@@ -7,8 +7,8 @@ import { searchMedicines } from "@/lib/finder";
 
 const SUGGESTED = ["Doliprane", "Augmentin", "Ventoline", "Glucophage"];
 
-/** The hero's one action: a medicine search with live suggestions. */
-export function HeroSearch() {
+/** The hero's one action: a medicine search with live suggestions. `dark` restyles the chips for the night map. */
+export function HeroSearch({ tone = "light" }: { tone?: "light" | "dark" }) {
   const router = useRouter();
   const listId = useId();
   const [q, setQ] = useState("");
@@ -101,14 +101,16 @@ export function HeroSearch() {
         )}
       </form>
 
-      <p className="mt-4 flex flex-wrap items-center gap-2 text-sm text-muted">
+      <p className={`mt-4 flex flex-wrap items-center gap-2 text-sm ${tone === "dark" ? "text-dusk-muted" : "text-muted"}`}>
         <span>Try</span>
         {SUGGESTED.map((s) => (
           <button
             key={s}
             type="button"
             onClick={() => go(s)}
-            className="rounded-full px-3 py-1 ring-1 ring-line transition-colors duration-150 hover:bg-surface hover:text-ink"
+            className={`rounded-full px-3 py-1 ring-1 transition-colors duration-150 ${
+              tone === "dark" ? "ring-white/15 hover:bg-white/10 hover:text-dusk-ink" : "ring-line hover:bg-surface hover:text-ink"
+            }`}
           >
             {s}
           </button>

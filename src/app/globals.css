@@ -1,34 +1,41 @@
-/* tastemaker: product-demo-workbench · N6 H1 F5+F4 C3 Ft4 S1 · mood warm (health, consumer) ·
-   palette hand-picked paper/pharmacy-green/amber, all text pairings >= 4.5:1 (see .tastemaker/style-lock.md) ·
-   critique: show 4 · philosophy 4 · hierarchy 4 · specificity 5 · restraint 4 · variety 4 */
+/* Pharmacy theme (v2): clean clinical white, pharmacy teal-green, a calm deep-teal
+   band for the night-duty rota. All text pairings >= 4.5:1 (see .tastemaker/style-lock.md). */
 @import "tailwindcss";
 
 @theme {
-  --color-paper: #f6f4ee;
-  --color-paper-2: #edeae2;
+  --color-paper: #f4f8f8;
+  --color-paper-2: #e8f0f0;
   --color-surface: #ffffff;
-  --color-ink: #15201a;
-  --color-muted: #5b655e;
-  --color-line: #dedbd2;
-  --color-green: #0b6b3a;
-  --color-green-700: #08552e;
-  --color-green-soft: #e4f0e7;
+  --color-ink: #0d2a30;
+  --color-muted: #4d666c;
+  --color-line: #d5e3e4;
+  --color-green: #07725e;
+  --color-green-700: #075f4f;
+  --color-green-soft: #ddf2ec;
   --color-amber: #b45309;
   --color-amber-ink: #9a4508;
   --color-amber-soft: #fbefdc;
   --color-danger: #b42318;
   --color-danger-soft: #fbe8e6;
-  /* Night palette: intro overlay and the "de garde" band only. */
-  --color-night: #0e1411;
-  --color-night-2: #17201b;
-  --color-neon: #2bd66b;
-  --color-night-muted: #9fb3a7;
+  /* Night-duty palette: deep teal + mint, used for the "de garde" band and badges. */
+  --color-night: #0b3a42;
+  --color-night-2: #104952;
+  --color-neon: #7ae8c8;
+  --color-night-muted: #a6cbd0;
+  /* Home map ("dusk"): the city at night. All text pairings >= 4.5:1, see style lock. */
+  --color-dusk: #061519;
+  --color-dusk-2: #0e262c;
+  --color-dusk-ink: #e8f3f1;
+  --color-dusk-muted: #8db0b3;
+  --color-dusk-mint: #7ae8c8;
+  --color-dusk-amber: #f2b35b;
+  --color-dusk-coral: #ff8a7a;
 
   --font-sans: var(--font-body);
   --font-display: var(--font-heading);
-  --font-mono: var(--font-data);
+  --font-mono: var(--font-body);
 
-  --radius-card: 14px;
+  --radius-card: 18px;
   --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -38,7 +45,13 @@ html {
 }
 
 body {
-  font-feature-settings: "ss01", "cv11";
+  font-feature-settings: "cv11";
+}
+
+/* Figures (stock, prices, km, times) use the body font with tabular digits
+   instead of a code-style monospace. */
+.font-mono {
+  font-variant-numeric: tabular-nums;
 }
 
 ::selection {
@@ -55,9 +68,9 @@ body {
 @utility surface {
   background: var(--color-surface);
   box-shadow:
-    0 0 0 1px color-mix(in oklab, var(--color-line) 90%, transparent),
-    0 1px 2px color-mix(in oklab, var(--color-ink) 5%, transparent),
-    0 10px 28px -14px color-mix(in oklab, var(--color-ink) 18%, transparent);
+    0 0 0 1px color-mix(in oklab, var(--color-line) 85%, transparent),
+    0 1px 2px color-mix(in oklab, var(--color-ink) 4%, transparent),
+    0 12px 32px -16px color-mix(in oklab, var(--color-green) 22%, transparent);
 }
 
 /* Tabular figures for stock counts, prices, distances, times. */
@@ -72,7 +85,8 @@ html[data-intro="skip"] .intro-overlay {
 }
 
 /* Hero items wait behind the intro; GSAP's autoAlpha takes over on entrance. */
-html:not([data-intro="skip"]) .hero-item {
+html:not([data-intro="skip"]) .hero-item,
+html:not([data-intro="skip"]) .hero-card {
   visibility: hidden;
 }
 
@@ -95,16 +109,84 @@ html:not([data-intro="skip"]) .hero-item {
   }
 }
 
-/* Intro LED cross: unlit dots read as the dead bulbs of a switched-off sign. */
-.intro-dot {
-  fill: #1c2a22;
-  transition: fill 120ms linear;
+/* Faint repeating pharmacy crosses, used on green panels (intro, CTA band). */
+.cross-pattern {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='44'%3E%3Cpath d='M20 14h4v6h6v4h-6v6h-4v-6h-6v-4h6z' fill='%23ffffff' fill-opacity='0.07'/%3E%3C/svg%3E");
 }
-.intro-dot.is-lit {
-  fill: var(--color-neon);
+/* Same pattern in green for light sections. */
+.cross-pattern-soft {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='44'%3E%3Cpath d='M20 14h4v6h6v4h-6v6h-4v-6h-6v-4h6z' fill='%2307725e' fill-opacity='0.06'/%3E%3C/svg%3E");
 }
-.intro-sign {
-  filter: drop-shadow(0 0 14px color-mix(in oklab, var(--color-neon) 45%, transparent));
+
+/* Soft blurred glows behind the hero, drifting very slowly. */
+@keyframes blob-drift {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(24px, -18px) scale(1.08);
+  }
+}
+.blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(60px);
+  animation: blob-drift 14s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Endless row of medicine names. The track holds two copies and slides by half. */
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+.marquee-track {
+  animation: marquee 40s linear infinite;
+}
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+/* FAQ chevron turns when its <details> opens. */
+details[open] .faq-chevron {
+  transform: rotate(180deg);
+}
+details summary::-webkit-details-marker {
+  display: none;
+}
+
+/* Hero illustration: capsules and tablets drift slowly around the cross. */
+@keyframes float-y {
+  0%,
+  100% {
+    transform: translateY(0) rotate(var(--r, 0deg));
+  }
+  50% {
+    transform: translateY(-10px) rotate(calc(var(--r, 0deg) + 4deg));
+  }
+}
+.float {
+  animation: float-y var(--d, 6s) ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+@keyframes soft-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 0.85;
+  }
+}
+.soft-pulse {
+  animation: soft-pulse 4s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
 }
 
 /* Command palette: quick fade + slight rise from 98% size. */
@@ -162,7 +244,205 @@ html:not([data-intro="skip"]) .hero-item {
 .toast-in {
   animation: toast-in 200ms var(--ease-out-quint);
 }
-/* Quiet the OSM tiles toward the paper palette so our markers carry the colour. */
+/* Quiet the OSM tiles toward the cool clinical palette so our markers carry the colour. */
 .leaflet-tile-pane {
-  filter: grayscale(0.9) sepia(0.12) brightness(1.04) contrast(0.92);
+  filter: grayscale(0.75) brightness(1.05) contrast(0.92) hue-rotate(-10deg);
+}
+
+/* ---------- Home map story ---------- */
+
+/* Glass panels floating over the map. */
+.night-card {
+  background: color-mix(in oklab, var(--color-dusk-2) 82%, transparent);
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  border-radius: 20px;
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, var(--color-dusk-mint) 14%, transparent),
+    0 24px 48px -24px rgba(0, 0, 0, 0.7);
+}
+
+/* Keeps the copy column readable over the map: left on desktop, bottom on phones. */
+.stage-vignette {
+  background:
+    linear-gradient(180deg, var(--color-dusk) 0%, transparent 18%),
+    linear-gradient(0deg, var(--color-dusk) 0%, color-mix(in oklab, var(--color-dusk) 80%, transparent) 38%, transparent 68%);
+}
+@media (min-width: 1024px) {
+  .stage-vignette {
+    background:
+      linear-gradient(180deg, var(--color-dusk) 0%, transparent 16%),
+      linear-gradient(90deg, var(--color-dusk) 0%, color-mix(in oklab, var(--color-dusk) 82%, transparent) 30%, transparent 58%);
+  }
+}
+
+/* No-WebGL poster: a quiet grid instead of streets. */
+.poster-grid {
+  background-color: var(--color-dusk);
+  background-image:
+    linear-gradient(color-mix(in oklab, var(--color-dusk-mint) 7%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in oklab, var(--color-dusk-mint) 7%, transparent) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* Pharmacy pins: positioned every frame from the map camera, styled by story state. */
+.pin {
+  position: absolute;
+  top: 0;
+  left: 0;
+  will-change: transform;
+}
+.pin-inner {
+  --pin: var(--color-dusk-mint);
+  position: relative;
+  display: grid;
+  place-items: center;
+  translate: -50% -50%;
+  color: var(--pin);
+  transition:
+    opacity 300ms var(--ease-out-quint),
+    scale 300ms var(--ease-out-quint);
+}
+[data-ready="false"] .pin-inner {
+  opacity: 0;
+  scale: 0.4;
+}
+[data-ready="true"] .pin-inner {
+  transition-delay: calc(var(--n) * 60ms);
+}
+.pin-cross {
+  width: 22px;
+  height: 22px;
+  filter: drop-shadow(0 0 4px var(--pin)) drop-shadow(0 0 14px color-mix(in oklab, var(--pin) 70%, transparent));
+  transition: rotate 300ms var(--ease-out-quint);
+}
+.pin-ring {
+  position: absolute;
+  inset: -12px;
+  border-radius: 999px;
+  border: 1.5px solid var(--pin);
+  opacity: 0;
+}
+.pin-inner:is([data-state="idle"], [data-state="found"], [data-state="duty"], [data-state="self"]) .pin-ring {
+  animation: pin-ring 2.4s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+.pin-inner[data-state="found"] {
+  --pin: var(--color-dusk-amber);
+  scale: 1.35;
+}
+.pin-inner:is([data-state="duty"], [data-state="self"]) {
+  scale: 1.25;
+}
+.pin-inner[data-state="out"] {
+  --pin: var(--color-dusk-coral);
+  opacity: 0.85;
+}
+/* Out of stock: the cross turns into an X. */
+.pin-inner[data-state="out"] .pin-cross {
+  rotate: 45deg;
+  filter: none;
+}
+.pin-inner[data-state="dim"] {
+  opacity: 0.28;
+  scale: 0.8;
+}
+.pin-inner[data-state="hidden"] {
+  opacity: 0;
+  scale: 0.5;
+}
+@keyframes pin-ring {
+  from {
+    transform: scale(0.45);
+    opacity: 0.8;
+  }
+  to {
+    transform: scale(1.7);
+    opacity: 0;
+  }
+}
+.pin-label {
+  position: absolute;
+  left: 22px;
+  top: 50%;
+  translate: 0 -50%;
+  display: flex;
+  flex-direction: column;
+  padding: 5px 11px;
+  border-radius: 12px;
+  white-space: nowrap;
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--color-dusk-ink);
+  background: color-mix(in oklab, var(--color-dusk) 88%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--pin) 40%, transparent);
+  animation: label-in 220ms var(--ease-out-quint);
+}
+.pin[data-flip="1"] .pin-label {
+  left: auto;
+  right: 22px;
+  align-items: flex-end;
+}
+.pin-label b {
+  font-weight: 600;
+  font-size: 13px;
+}
+.pin-label span {
+  color: var(--pin);
+}
+.pin-inner[data-state="found"] .pin-label,
+.pin-inner[data-state="duty"] .pin-label {
+  scale: 0.75;
+  transform-origin: left center;
+}
+.pin[data-flip="1"] .pin-inner:is([data-state="found"], [data-state="duty"]) .pin-label {
+  transform-origin: right center;
+}
+@keyframes label-in {
+  from {
+    opacity: 0;
+    translate: -6px -50%;
+  }
+}
+
+.caret {
+  display: inline-block;
+  width: 2px;
+  height: 1.1em;
+  margin-left: 2px;
+  vertical-align: -0.18em;
+  background: var(--color-dusk-mint);
+  animation: caret 1s steps(1) infinite;
+}
+@keyframes caret {
+  50% {
+    opacity: 0;
+  }
+}
+
+.live-dot {
+  position: relative;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--color-dusk-mint);
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--color-dusk-mint) 22%, transparent);
+}
+
+.qty-tick {
+  animation: qty-tick 300ms var(--ease-out-quint);
+}
+@keyframes qty-tick {
+  from {
+    color: var(--color-dusk-mint);
+    scale: 1.3;
+  }
+}
+
+/* MapLibre's attribution, restyled for the night map. */
+.maplibregl-ctrl-attrib.maplibregl-compact {
+  background: color-mix(in oklab, var(--color-dusk) 80%, transparent) !important;
+  color: var(--color-dusk-muted);
+}
+.maplibregl-ctrl-attrib a {
+  color: var(--color-dusk-muted) !important;
 }

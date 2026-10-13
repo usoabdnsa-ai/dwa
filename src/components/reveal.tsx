@@ -11,11 +11,11 @@ export function Reveal() {
     const mm = gsap.matchMedia();
     mm.add("(prefers-reduced-motion: no-preference)", () => {
       const els = gsap.utils.toArray<HTMLElement>("[data-reveal]");
-      gsap.set(els, { autoAlpha: 0, y: 24 });
+      gsap.set(els, { autoAlpha: 0, y: 16 });
       ScrollTrigger.batch(els, {
         start: "top 85%",
         once: true,
-        onEnter: (batch) => gsap.to(batch, { autoAlpha: 1, y: 0, duration: 0.7, ease: "power3.out", stagger: 0.08 }),
+        onEnter: (batch) => gsap.to(batch, { autoAlpha: 1, y: 0, duration: 0.6, ease: "power2.out", stagger: 0.1 }),
       });
     });
     return () => mm.revert();

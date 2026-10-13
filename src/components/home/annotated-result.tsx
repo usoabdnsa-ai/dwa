@@ -39,7 +39,7 @@ export function AnnotatedResult() {
         </div>
 
         <figure data-reveal className="relative">
-          <div className="surface rounded-card p-2 sm:p-3 lg:rotate-[0.6deg]">
+          <div className="surface rounded-card p-2 sm:p-3">
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b border-line px-4 pt-3 pb-4">
               <span className="font-display text-xl font-semibold">{med.name}</span>
               <span className="font-mono text-sm text-muted">{med.dosage} · {med.form}</span>

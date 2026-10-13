@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
-import { Bricolage_Grotesque, Public_Sans, JetBrains_Mono } from "next/font/google";
+import { Plus_Jakarta_Sans, Inter } from "next/font/google";
 import { introBootScript } from "@/lib/intro-boot";
 import "./globals.css";
 
-const heading = Bricolage_Grotesque({ variable: "--font-heading", subsets: ["latin"] });
-const body = Public_Sans({ variable: "--font-body", subsets: ["latin"] });
-const data = JetBrains_Mono({ variable: "--font-data", subsets: ["latin"], weight: ["400", "500"] });
+const heading = Plus_Jakarta_Sans({ variable: "--font-heading", subsets: ["latin"] });
+const body = Inter({ variable: "--font-body", subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: { default: "dwa · find your medicine in stock", template: "%s · dwa" },
@@ -14,7 +13,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${heading.variable} ${body.variable} ${data.variable} h-full antialiased`}>
+    <html lang="en" suppressHydrationWarning className={`${heading.variable} ${body.variable} h-full antialiased`}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: introBootScript }} />
       </head>

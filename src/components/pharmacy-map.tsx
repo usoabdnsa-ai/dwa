@@ -8,10 +8,10 @@ import type { Status } from "@/lib/finder";
 export type MapPoint = { id: string; name: string; lat: number; lng: number; status: Status | "none"; onDuty: boolean };
 
 const COLOR: Record<MapPoint["status"], string> = {
-  in: "#0b6b3a",
+  in: "#07725e",
   low: "#b45309",
   out: "#b42318",
-  none: "#15201a",
+  none: "#0d2a30",
 };
 
 function FitBounds({ points, origin }: { points: MapPoint[]; origin: { lat: number; lng: number } }) {
@@ -43,7 +43,7 @@ export default function PharmacyMap({
         url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       <FitBounds points={points} origin={origin} />
-      <CircleMarker center={[origin.lat, origin.lng]} radius={7} pathOptions={{ color: "#fff", weight: 3, fillColor: "#15201a", fillOpacity: 1 }}>
+      <CircleMarker center={[origin.lat, origin.lng]} radius={7} pathOptions={{ color: "#fff", weight: 3, fillColor: "#0d2a30", fillOpacity: 1 }}>
         <Tooltip direction="top" offset={[0, -6]}>You</Tooltip>
       </CircleMarker>
       {points.map((p) => {
@@ -55,7 +55,7 @@ export default function PharmacyMap({
             radius={hot ? 11 : p.status === "out" ? 6 : 8}
             eventHandlers={{ click: () => onSelect?.(p.id) }}
             pathOptions={{
-              color: p.onDuty ? "#2bd66b" : "#fff",
+              color: p.onDuty ? "#7ae8c8" : "#fff",
               weight: p.onDuty ? 3 : 2,
               fillColor: COLOR[p.status],
               fillOpacity: p.status === "out" ? 0.55 : 1,

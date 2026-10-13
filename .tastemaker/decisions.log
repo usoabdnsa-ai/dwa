@@ -1,2 +1,7 @@
 2026-10-13 pending-review surface=home axis=structure choice="search-as-hero + annotated real result + night de-garde band" reason="first build, user not yet asked"
 2026-10-13 pending-review surface=intro axis=motion choice="LED pharmacy cross lights centre-out, counter, neon flicker, 5 columns lift" reason="mirrors bac-prep intro the user asked for"
+2026-10-13 rejected surface=home axis=structure choice="v2 clinical: hero+stats strip+8 icon cards+3 steps+quotes+FAQ+CTA band" reason="user: looks generated, standard SaaS section stack"
+2026-10-13 kept surface=home axis=structure choice="Live city map: full-screen 3D map of Alger, pharmacies as glowing pins, search floats over map, scroll flies camera between pharmacies" reason="user picked over Night sign and Pharmacy shelf"
+2026-10-13 pending-review surface=home axis=structure choice="Live city map built: sticky MapLibre night map, 7 scroll beats, floating pill nav, one-line footer" reason="awaiting user verdict"
+2026-10-13 kept surface=home axis=structure choice="Live city map built: sticky MapLibre night map, 7 scroll beats, floating pill nav, one-line footer; overview zoom fixed so pins clear the headline" reason="user verdict: keep it"
+2026-10-13 deferred surface=code axis=cleanup choice="unused v2 files (components/home/*, intro, reveal, boot script, blob/marquee CSS) left in place" reason="user: keep them for now"

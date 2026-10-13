@@ -18,7 +18,7 @@ export function SiteHeader() {
           </Link>
           <Link
             href="/login"
-            className="rounded-full bg-ink px-4 py-2 font-medium text-paper transition-colors duration-150 hover:bg-green"
+            className="rounded-full bg-green px-4 py-2 font-medium text-white transition-colors duration-150 hover:bg-green-700"
           >
             For pharmacists
           </Link>
