@@ -1,0 +1,194 @@
+/*
+ * tastemaker build stamp · v6 "Evergreen" (second pass; the gov-style first pass was rejected as dated)
+ * mood: premium calm health-tech, light with one dark evergreen band · palette hand-built from research (trust green + one warm CTA), contrast-checked
+ * macrostructure: split hero with live phone mockup + numbered how-it-works rail + live night board + photo-led feature rows + search close
+ * nav: N1 sticky bar · hero: H3 split, product phone · footer: Ft2 dark evergreen
+ * text-safe: ink/bg 15.4 · ink/white 16.6 · muted/bg 5.9 · muted/white 6.4 · green/bg 9.2 · green/sage 8.3 · white/cta 5.9
+ *            sage/dark 12.8 · sage-2/dark 8.1 · peach/dark 10.0 · amber/amber-tint 5.7 · red/white 6.6 · ink/sage 14.0
+ * critique: show 5 · philosophy 4 · hierarchy 5 · specificity 5 · restraint 4 · variety 4
+ * Photos: CC0 via Openverse (stocksnap / rawpixel), see public/v6/photos/CREDITS.html.txt. WebP, 960 to 1024px sources, served unoptimized.
+ * Performance: transform/opacity only, no filters or backdrop blur.
+ */
+.v6 {
+  --e-bg: #f6f7f4;
+  --e-white: #ffffff;
+  --e-ink: #12201b;
+  --e-muted: #566259;
+  --e-line: #dfe4df;
+  --e-green: #0f4c3a;
+  --e-dark: #0b2a22;
+  --e-sage: #dcefe4;
+  --e-sage-2: #9fc4b2;
+  --e-cta: #a8461f;
+  --e-cta-hover: #923c1a;
+  --e-coral: #c2552d;
+  --e-peach: #f2c9a8;
+  --e-amber: #8a5300;
+  --e-amber-tint: #fff1d6;
+  --e-red: #b42318;
+  --e-red-tint: #fdecea;
+  --e-ease: cubic-bezier(0.23, 1, 0.32, 1);
+
+  background: var(--e-bg);
+  color: var(--e-ink);
+  font-family: var(--font-v6-sans), system-ui, sans-serif;
+}
+
+.v6 ::selection {
+  background: var(--e-green);
+  color: var(--e-white);
+}
+
+.v6 :focus-visible {
+  outline: 2px solid var(--e-coral);
+  outline-offset: 3px;
+}
+
+/* Editorial serif for headlines; italics carry the emphasis in green. */
+.v6-serif {
+  font-family: var(--font-v6-serif), Georgia, serif;
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  line-height: 1.04;
+}
+.v6-serif em {
+  font-style: italic;
+  color: var(--e-green);
+}
+
+.v6-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+.v6-card {
+  background: var(--e-white);
+  border: 1px solid var(--e-line);
+  border-radius: 20px;
+  box-shadow:
+    0 1px 2px rgb(18 32 27 / 0.04),
+    0 12px 32px -20px rgb(15 76 58 / 0.25);
+}
+
+.v6-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  font-weight: 600;
+  transition:
+    transform 140ms var(--e-ease),
+    background-color 160ms var(--e-ease);
+}
+.v6-btn:active {
+  transform: scale(0.97);
+}
+.v6-btn-cta {
+  background: var(--e-cta);
+  color: var(--e-white);
+}
+.v6-btn-cta:hover {
+  background: var(--e-cta-hover);
+}
+.v6-btn-ghost {
+  background: var(--e-white);
+  color: var(--e-ink);
+  box-shadow: inset 0 0 0 1px var(--e-line);
+}
+.v6-btn-ghost:hover {
+  box-shadow: inset 0 0 0 1px var(--e-green);
+}
+
+.v6-input {
+  width: 100%;
+  border-radius: 14px;
+  background: var(--e-white);
+  border: 1px solid var(--e-line);
+  padding: 0.7rem 0.9rem;
+  transition:
+    border-color 160ms var(--e-ease),
+    box-shadow 160ms var(--e-ease);
+}
+.v6-input:focus {
+  outline: none;
+  border-color: var(--e-green);
+  box-shadow: 0 0 0 4px rgb(15 76 58 / 0.12);
+}
+
+.v6-gauge {
+  position: relative;
+  display: block;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--e-line);
+  overflow: hidden;
+}
+.v6-gauge > i {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  transform-origin: left center;
+}
+
+/* Phone frame for the hero mockup. */
+.v6-phone {
+  border-radius: 44px;
+  background: #0d1512;
+  padding: 10px;
+  box-shadow:
+    0 50px 100px -40px rgb(11 42 34 / 0.55),
+    0 0 0 1px rgb(255 255 255 / 0.06) inset;
+}
+.v6-phone-screen {
+  border-radius: 34px;
+  background: var(--e-bg);
+  overflow: hidden;
+}
+
+@keyframes v6-live {
+  0% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+.v6-live {
+  animation: v6-live 2s var(--e-ease) infinite;
+}
+
+@keyframes v6-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+.v6-marquee {
+  animation: v6-marquee 45s linear infinite;
+}
+.v6-marquee-wrap:hover .v6-marquee {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .v6 [data-hero-in] {
+    visibility: hidden;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .v6 *,
+  .v6 *::before,
+  .v6 *::after {
+    transition-duration: 1ms !important;
+  }
+  .v6-live,
+  .v6-marquee {
+    animation: none;
+  }
+}
+
+/* First-visit intro: the boot script marks repeat or reduced-motion visits before paint. */
+html[data-v6intro="skip"] .v6-intro {
+  display: none;
+}

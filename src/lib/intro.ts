@@ -26,6 +26,20 @@ function getSnapshot() {
   return done || document.documentElement.dataset.intro === "skip";
 }
 
+/** Runs `cb` once the intro has finished (right away if it already has). Returns an unsubscribe. */
+export function onIntroDone(cb: () => void) {
+  if (getSnapshot()) {
+    cb();
+    return () => {};
+  }
+  const l = () => {
+    listeners.delete(l);
+    cb();
+  };
+  listeners.add(l);
+  return () => listeners.delete(l);
+}
+
 export function useIntroDone() {
   return useSyncExternalStore(subscribe, getSnapshot, () => false);
 }

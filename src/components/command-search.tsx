@@ -6,11 +6,13 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { pharmacies } from "@/lib/data";
 import { searchMedicines } from "@/lib/finder";
+import { useT } from "@/lib/locale";
 
 type Row = { key: string; label: string; meta: string; href: string; kind: "medicine" | "pharmacy" };
 
-/** The nav's search pill: opens a keyboard-driven spotlight over medicines and pharmacies. */
+/** The search field in the night pill nav: opens a keyboard-driven spotlight over medicines and pharmacies. */
 export function CommandSearch() {
+  const { t } = useT();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
@@ -53,16 +55,19 @@ export function CommandSearch() {
 
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
-      <Dialog.Trigger className="group flex h-10 w-full max-w-sm items-center gap-2.5 rounded-full bg-surface px-4 text-sm text-muted ring-1 ring-line transition-[box-shadow,color] duration-150 hover:text-ink hover:ring-ink/25">
+      <Dialog.Trigger
+        aria-label={t("cmd.triggerLabel")}
+        className="group flex h-9 items-center gap-2 rounded-full px-3 text-sm text-dusk-muted ring-1 ring-white/10 transition-colors duration-150 hover:text-dusk-ink hover:ring-white/25 md:w-64"
+      >
         <Search className="size-4" aria-hidden />
-        <span className="flex-1 text-left">Search a medicine or pharmacy</span>
-        <kbd className="hidden rounded-md bg-paper-2 px-1.5 py-0.5 font-mono text-[11px] text-muted sm:inline">Ctrl K</kbd>
+        <span className="hidden flex-1 truncate text-start whitespace-nowrap md:block">{t("cmd.trigger")}</span>
+        <kbd className="hidden rounded-md bg-white/10 px-1.5 py-0.5 font-mono text-[11px] md:inline">Ctrl K</kbd>
       </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay className="cmd-overlay fixed inset-0 z-50 bg-ink/30 backdrop-blur-[2px]" />
         <Dialog.Content className="cmd-panel surface fixed top-[12vh] left-1/2 z-50 w-[min(560px,calc(100vw-2rem))] -translate-x-1/2 overflow-hidden rounded-card">
-          <Dialog.Title className="sr-only">Search</Dialog.Title>
-          <Dialog.Description className="sr-only">Find a medicine or a pharmacy</Dialog.Description>
+          <Dialog.Title className="sr-only">{t("cmd.title")}</Dialog.Title>
+          <Dialog.Description className="sr-only">{t("cmd.desc")}</Dialog.Description>
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -89,22 +94,22 @@ export function CommandSearch() {
                   setActive((a) => Math.max(a - 1, 0));
                 }
               }}
-              placeholder="Doliprane, amoxicillin, Hydra…"
-              aria-label="Search"
+              placeholder={t("cmd.placeholder")}
+              aria-label={t("cmd.title")}
               autoComplete="off"
               spellCheck={false}
               className="h-14 flex-1 bg-transparent text-base outline-none placeholder:text-muted"
             />
           </form>
-          <ul role="listbox" aria-label="Results" className="max-h-[50vh] overflow-y-auto p-2">
-            {!q && <li className="px-3 pt-1 pb-2 text-xs font-medium text-muted">Often searched</li>}
+          <ul role="listbox" aria-label={t("cmd.results")} className="max-h-[50vh] overflow-y-auto p-2">
+            {!q && <li className="px-3 pt-1 pb-2 text-xs font-medium text-muted">{t("cmd.often")}</li>}
             {rows.map((r, i) => (
               <li key={r.kind + r.key} role="option" aria-selected={i === active}>
                 <button
                   type="button"
                   onMouseEnter={() => setActive(i)}
                   onClick={() => go(r.href)}
-                  className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left ${i === active ? "bg-green-soft" : ""}`}
+                  className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-start ${i === active ? "bg-green-soft" : ""}`}
                 >
                   {r.kind === "pharmacy" ? (
                     <Store className="size-4 text-muted" aria-hidden />

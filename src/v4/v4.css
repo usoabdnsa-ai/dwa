@@ -1,0 +1,178 @@
+/*
+ * tastemaker build stamp · v4 "Neon Pharmacy Night"
+ * mood: premium/cinematic, dark only · palette hand-tuned to the user's pick, contrast-checked
+ * macrostructure: centered neon hero + pinned night-clock story + live feed + glow close
+ * nav: N2 glass bar · hero: H1 centered over light source · footer: Ft1 one-line
+ * text-safe: ink/bg 18.5 · ink/surface 15.9 · muted/bg 8.7 · muted/surface 7.5 · neon/bg 14.6 · neon/surface 12.5
+ *            magenta/bg 6.7 · magenta/surface 5.8 · amber/bg 11.9 · red/bg 6.9 · red/surface 6.0 · bg/neon 14.6
+ * critique: show 4 · philosophy 4 · hierarchy 4 · specificity 4 · restraint 3 · variety 4
+ * Scoped under .v4 so v1/v2/v3 are untouched.
+ */
+.v4 {
+  --nn-bg: #04120e;
+  --nn-bg-2: #071a14;
+  --nn-surface: #0c231c;
+  --nn-line: #1f4a3c;
+  --nn-ink: #e9fff4;
+  --nn-muted: #8fb8a8;
+  --nn-neon: #39ff9c;
+  --nn-magenta: #ff4fd8;
+  --nn-amber: #ffc24b;
+  --nn-red: #ff6b6b;
+  --nn-ease: cubic-bezier(0.23, 1, 0.32, 1);
+
+  background: var(--nn-bg);
+  color: var(--nn-ink);
+  font-family: var(--font-v4-sans), system-ui, sans-serif;
+  color-scheme: dark;
+}
+
+.v4 ::selection {
+  background: var(--nn-neon);
+  color: var(--nn-bg);
+}
+
+.v4 :focus-visible {
+  outline: 2px solid var(--nn-neon);
+  outline-offset: 3px;
+}
+
+.v4-display {
+  font-family: var(--font-v4-display), system-ui, sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 0.95;
+}
+
+.v4-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Glass over the night. A tinted fill only: a live backdrop blur on every
+   card re-renders whatever moves behind it, which is what made scrolling drag. */
+.v4-glass {
+  background: color-mix(in oklab, var(--nn-ink) 5%, transparent);
+  border: 1px solid color-mix(in oklab, var(--nn-ink) 12%, transparent);
+}
+/* The one surface that truly floats over moving content keeps a light blur. */
+.v4-glass-blur {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+@media (prefers-reduced-transparency: reduce) {
+  .v4-glass {
+    background: var(--nn-surface);
+  }
+  .v4-glass-blur {
+    backdrop-filter: none;
+  }
+}
+
+/* Neon tube: layered glow around a stroke or text. */
+.v4-neon {
+  color: var(--nn-neon);
+  filter: drop-shadow(0 0 4px var(--nn-neon)) drop-shadow(0 0 18px color-mix(in oklab, var(--nn-neon) 70%, transparent));
+}
+.v4-neon-m {
+  color: var(--nn-magenta);
+  filter: drop-shadow(0 0 4px var(--nn-magenta)) drop-shadow(0 0 18px color-mix(in oklab, var(--nn-magenta) 70%, transparent));
+}
+.v4-glow-text {
+  text-shadow:
+    0 0 6px color-mix(in oklab, currentColor 80%, transparent),
+    0 0 28px color-mix(in oklab, currentColor 45%, transparent);
+}
+
+/* Rotating light around a frame (search field, primary cards). A big conic
+   square spins on the compositor (transform only); an inner plate masks all but
+   a 1.5px rim, so nothing repaints per frame. */
+.v4-ring {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+.v4-ring::before {
+  content: "";
+  position: absolute;
+  z-index: -2;
+  left: 50%;
+  top: 50%;
+  width: max(200%, 400px);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  background: conic-gradient(var(--nn-neon), transparent 25%, var(--nn-magenta) 50%, transparent 75%, var(--nn-neon));
+  animation: v4-spin 6s linear infinite;
+  will-change: transform;
+}
+.v4-ring::after {
+  content: "";
+  position: absolute;
+  inset: 1.5px;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--nn-bg-2);
+}
+@keyframes v4-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.v4-press {
+  transition: transform 140ms var(--nn-ease);
+}
+.v4-press:active {
+  transform: scale(0.97);
+}
+
+/* Stock gauge: a thin glowing tube. */
+.v4-gauge {
+  position: relative;
+  display: block;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--nn-line);
+  overflow: hidden;
+}
+.v4-gauge > i {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  transform-origin: left center;
+}
+
+/* Star field behind the hero. */
+@keyframes v4-twinkle {
+  50% {
+    opacity: 0.2;
+  }
+}
+.v4-star[data-twinkle] {
+  animation: v4-twinkle var(--d, 3s) linear infinite;
+}
+
+/* Elements the hero timeline reveals start hidden only when motion is allowed. */
+@media (prefers-reduced-motion: no-preference) {
+  .v4 [data-hero-in] {
+    visibility: hidden;
+  }
+}
+
+/* First-visit intro: the boot script marks repeat or reduced-motion visits before paint. */
+html[data-v4intro="skip"] .v4-intro {
+  display: none;
+}
+
+@keyframes v4-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v4-ring::before,
+  .v4-star {
+    animation: none;
+  }
+}

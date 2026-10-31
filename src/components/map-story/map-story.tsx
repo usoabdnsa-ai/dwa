@@ -8,8 +8,11 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import type { GeoJSONSource, Map as MlMap } from "maplibre-gl";
 import { ArrowRight, Minus, Phone, Plus, Search } from "lucide-react";
 import { getPharmacy, pharmacies } from "@/lib/data";
-import { availabilityFor, distanceKm, fmtKm, fmtUpdated, stockOf } from "@/lib/finder";
+import { availabilityFor, distanceKm, fmtKm, stockOf } from "@/lib/finder";
+import { agoText, type MessageKey, type T } from "@/lib/i18n";
+import { useT } from "@/lib/locale";
 import { HeroSearch } from "@/components/hero-search";
+import { onIntroDone } from "@/lib/intro";
 import { mapStyle } from "./map-style";
 import { BEATS, INTRO_CAM, ROUTE, ROUTE_LEAD, type BeatId, type Cam } from "./story";
 
@@ -100,7 +103,15 @@ const samePhase = (a: Phase, b: Phase) =>
 
 type PinState = "idle" | "dim" | "out" | "found" | "duty" | "self" | "hidden";
 
-function pinView(id: string, phase: Phase): { state: PinState; label?: string; sub?: string } {
+const ANSWER_KEY: Record<string, MessageKey> = {
+  meziane: "home.ans.meziane",
+  belouizdad: "home.ans.belouizdad",
+  "bmr-colonne": "home.ans.bmr",
+  "hydra-pins": "home.ans.hydra",
+  "kouba-garidi": "home.ans.kouba",
+};
+
+function pinView(id: string, phase: Phase, t: T): { state: PinState; label?: string; sub?: string } {
   const p = getPharmacy(id)!;
   const bare = p.name.replace("Pharmacie ", "");
   const short = bare[0].toUpperCase() + bare.slice(1);
@@ -110,11 +121,11 @@ function pinView(id: string, phase: Phase): { state: PinState; label?: string; s
       if (k < 0) return { state: "dim" };
       if (k >= phase.stops) return { state: "idle" };
       const stop = ROUTE[k];
-      return { state: k === ROUTE.length - 1 ? "found" : "out", label: short, sub: `${stop.mins} min · ${stop.answer}` };
+      return { state: k === ROUTE.length - 1 ? "found" : "out", label: short, sub: t("home.stop", { mins: stop.mins, answer: ANSWER_KEY[stop.id] ? t(ANSWER_KEY[stop.id]) : stop.answer }) };
     }
     case "newrule":
       if (!phase.found) return { state: "idle" };
-      return id === GARIDI ? { state: "found", label: short, sub: "3 left" } : { state: "out" };
+      return id === GARIDI ? { state: "found", label: short, sub: t("home.left", { n: garidi.item?.qty ?? 0 }) } : { state: "out" };
     case "mechanism":
       return { state: id === GARIDI ? "found" : "dim" };
     case "night":
@@ -145,7 +156,12 @@ function posterProject(w: number, h: number) {
   const [x0, x1] = [Math.min(...pts.map((p) => p[0])), Math.max(...pts.map((p) => p[0]))];
   const [y0, y1] = [Math.min(...pts.map((p) => p[1])), Math.max(...pts.map((p) => p[1]))];
   const wide = w >= 1024;
-  const box = wide ? { l: w * 0.48, r: w * 0.92, t: h * 0.25, b: h * 0.75 } : { l: w * 0.12, r: w * 0.88, t: h * 0.14, b: h * 0.5 };
+  const rtl = document.documentElement.dir === "rtl";
+  const box = wide
+    ? rtl
+      ? { l: w * 0.08, r: w * 0.52, t: h * 0.25, b: h * 0.75 }
+      : { l: w * 0.48, r: w * 0.92, t: h * 0.25, b: h * 0.75 }
+    : { l: w * 0.12, r: w * 0.88, t: h * 0.14, b: h * 0.5 };
   const k = Math.min((box.r - box.l) / (x1 - x0), (box.b - box.t) / (y1 - y0));
   return (c: [number, number]) => {
     const [x, y] = merc(c);
@@ -154,6 +170,7 @@ function posterProject(w: number, h: number) {
 }
 
 export function MapStory() {
+  const { t } = useT();
   const rootRef = useRef<HTMLElement>(null);
   const mapRef = useRef<HTMLDivElement>(null);
   const pinsRef = useRef<HTMLDivElement>(null);
@@ -201,8 +218,11 @@ export function MapStory() {
     const padding = () => {
       const w = window.innerWidth;
       const h = window.innerHeight;
+      // The copy column sits on the reading side: left in English and French, right in Arabic.
+      const rtl = document.documentElement.dir === "rtl";
+      const column = Math.min(560, w * 0.4);
       return w >= 1024
-        ? { left: Math.min(560, w * 0.4), top: 80, right: 40, bottom: 40 }
+        ? { left: rtl ? 40 : column, top: 80, right: rtl ? column : 40, bottom: 40 }
         : { left: 0, right: 0, top: 70, bottom: h * 0.42 };
     };
 
@@ -265,9 +285,21 @@ export function MapStory() {
     // Ease the rendered position toward the scroll position, then stop. Time-based so a
     // slow phone settles as fast as a fast one; a big jump (Home key, link) skips ahead.
     let last = 0;
+    // Adaptive quality: if the camera can't hold ~40 fps while moving, drop the map to
+    // 1x resolution once. Fast machines never notice; slow ones stop stuttering.
+    let slowAvg = 0;
+    let slowFrames = 0;
+    let downgraded = false;
     const tick = (now: number) => {
       const dt = Math.min(0.1, (now - (last || now)) / 1000);
       last = now;
+      if (map && !downgraded && dt > 0) {
+        slowAvg = slowAvg ? slowAvg * 0.9 + dt * 0.1 : dt;
+        if (++slowFrames > 20 && slowAvg > 0.025 && map.getPixelRatio() > 1) {
+          map.setPixelRatio(1);
+          downgraded = true;
+        }
+      }
       const vh = window.innerHeight;
       let d = target - current;
       if (Math.abs(d) > vh * 1.5) {
@@ -314,6 +346,8 @@ export function MapStory() {
     };
 
     let cleanupPoster: (() => void) | undefined;
+    let stopWaiting: (() => void) | undefined;
+    let flyIn: gsap.core.Tween | undefined;
     (async () => {
       const ml = (await import("maplibre-gl")).default;
       if (disposed) return;
@@ -325,10 +359,12 @@ export function MapStory() {
           ...start,
           interactive: false,
           maxPitch: 60,
-          pixelRatio: Math.min(window.devicePixelRatio, 2),
+          // The camera redraws the whole 3D city on every scroll frame: cap the resolution
+          // and skip MSAA so it keeps up on ordinary laptops and phones.
+          pixelRatio: Math.min(window.devicePixelRatio, 1.5),
           fadeDuration: 0,
           attributionControl: { compact: true },
-          canvasContextAttributes: { antialias: true },
+          canvasContextAttributes: { antialias: false },
         });
       } catch {
         cleanupPoster = startPoster();
@@ -359,20 +395,25 @@ export function MapStory() {
         attrib?.classList.remove("maplibregl-compact-show");
         attrib?.removeAttribute("open");
         setMode("map");
-        if (intro < 1 && current < 10) {
-          const o = { t: 0 };
-          gsap.to(o, {
-            t: 1,
-            duration: 2.6,
-            ease: "power2.inOut",
-            onUpdate: () => {
-              intro = o.t;
-              apply(current);
-            },
-          });
-        } else {
-          intro = 1;
-        }
+        // Hold the camera high above the bay until the LED intro hands over, then fly in.
+        stopWaiting = onIntroDone(() => {
+          if (disposed) return;
+          if (intro < 1 && current < 10) {
+            const o = { t: 0 };
+            flyIn = gsap.to(o, {
+              t: 1,
+              duration: 2.6,
+              ease: "power2.inOut",
+              onUpdate: () => {
+                intro = o.t;
+                apply(current);
+              },
+            });
+          } else {
+            intro = 1;
+            apply(current);
+          }
+        });
         apply(current);
       });
       apply(current);
@@ -383,6 +424,8 @@ export function MapStory() {
       cancelAnimationFrame(raf);
       st.kill();
       cleanupPoster?.();
+      stopWaiting?.();
+      flyIn?.kill();
       map?.remove();
     };
   }, []);
@@ -403,7 +446,7 @@ export function MapStory() {
 
         <div ref={pinsRef} className="pointer-events-none absolute inset-0" data-ready={mode !== "loading"}>
           {pharmacies.map((p, n) => {
-            const v = pinView(p.id, phase);
+            const v = pinView(p.id, phase, t);
             return (
               <div key={p.id} data-pin={p.id} className="pin" style={{ ["--n" as string]: n }}>
                 <div className="pin-inner" data-state={v.state}>
@@ -429,14 +472,14 @@ export function MapStory() {
             <div className="flex items-baseline justify-between gap-3">
               <p className="font-display text-lg font-bold">{QUERY}</p>
               <span className="rounded-full bg-[#f2b35b] px-2.5 py-0.5 text-xs font-semibold text-[#06241f]">
-                {garidi.item?.qty} left
+                {t("home.left", { n: garidi.item?.qty ?? 0 })}
               </span>
             </div>
-            <p className="text-xs text-dusk-muted">100 µg · Inhaler · Prescription</p>
+            <p className="text-xs text-dusk-muted">{t("home.cardMeta")}</p>
             <div className="mt-3 border-t border-white/10 pt-3 text-sm">
               <p className="font-semibold">{garidi.pharmacy.name}</p>
               <p className="text-dusk-muted">
-                Counted {fmtUpdated(garidi.item?.updatedMinsAgo ?? 0)} by {garidi.pharmacy.pharmacist}
+                {t("home.counted", { ago: agoText(t, garidi.item?.updatedMinsAgo ?? 0), who: garidi.pharmacy.pharmacist })}
               </p>
               <p className="mt-2 flex items-center gap-2 text-dusk-mint">
                 <Phone className="size-3.5" /> {garidi.pharmacy.phone.replace("+213 ", "0")} · {fmtKm(garidi.km)}
@@ -449,8 +492,8 @@ export function MapStory() {
         <div ref={shelfRef} className="pointer-events-none absolute top-0 left-0 opacity-0">
           <div className="night-card absolute bottom-7 left-0 w-64 -translate-x-1/2 p-4 sm:w-72 lg:left-5 lg:translate-x-0">
             <p className="flex items-center justify-between text-sm font-semibold">
-              Meziane · stock
-              <span className="text-xs font-normal text-dusk-muted">{phase.ticked ? "updated just now" : "behind the counter"}</span>
+              {t("home.shelf")}
+              <span className="text-xs font-normal text-dusk-muted">{phase.ticked ? t("home.updatedNow") : t("home.behind")}</span>
             </p>
             <ul className="mt-2 divide-y divide-white/10 text-sm">
               {mezianeShelf.map((s, k) => {
@@ -486,7 +529,7 @@ export function MapStory() {
               {QUERY.slice(0, phase.typed)}
               <span className="caret" />
             </span>
-            {phase.found && <span className="text-sm text-dusk-mint">1 of {pharmacies.length} has it</span>}
+            {phase.found && <span className="text-sm text-dusk-mint">{t("home.found", { n: pharmacies.length })}</span>}
           </div>
         </div>
       </div>
@@ -503,20 +546,21 @@ export function MapStory() {
   );
 }
 
-const gutter = "px-4 sm:px-6 lg:pl-[max(1.5rem,calc((100vw-72rem)/2+1.5rem))]";
+const gutter = "px-4 sm:px-6 lg:ps-[max(1.5rem,calc((100vw-72rem)/2+1.5rem))]";
 
 function Hook() {
+  const { t } = useT();
   return (
     <div className={`sticky top-0 flex min-h-svh flex-col justify-end pt-28 pb-10 lg:justify-center lg:pb-0 ${gutter}`}>
       <div className="max-w-xl">
         <p className="flex items-center gap-2 text-sm font-medium text-dusk-mint">
-          <span className="live-dot" /> Live stock from {pharmacies.length} pharmacies in Alger
+          <span className="live-dot" /> {t("home.live", { n: pharmacies.length })}
         </p>
         <h1 className="mt-5 font-display text-[2.75rem] leading-[1.02] font-extrabold tracking-tight text-balance sm:text-7xl">
-          Every shelf in Alger, on one map.
+          {t("home.title")}
         </h1>
         <p className="mt-5 max-w-[42ch] text-lg leading-relaxed text-dusk-muted">
-          Type a medicine. The pharmacies that have it light up, with the count their pharmacist entered today.
+          {t("home.lede")}
         </p>
         <div className="mt-8">
           <HeroSearch tone="dark" />
@@ -526,45 +570,42 @@ function Hook() {
   );
 }
 
-const CHAPTERS: Record<Exclude<BeatId, "hook">, { tag: string; tagClass?: string; title: string; body: ReactNode; link?: { href: string; label: string } }> = {
-  oldway: {
-    tag: "Without dwa",
-    tagClass: "text-[#ff8a7a]",
-    title: "One inhaler. Five pharmacies. 47 minutes.",
-    body: "The usual way: walk in, ask, get sent to the next one. Follow the route across the city.",
-  },
-  newrule: {
-    tag: "With dwa",
-    title: "Search first. One pin lights up.",
-    body: `${outCount} pharmacies are out of ${QUERY} today. ${garidi.pharmacy.name} in ${garidi.pharmacy.commune} has ${garidi.item?.qty} left.`,
-  },
-  mechanism: {
-    tag: "The count",
-    title: `Counted ${fmtUpdated(garidi.item?.updatedMinsAgo ?? 0)}.`,
-    body: "The number on the map is the pharmacist's own count, not a guess. Call to set a box aside, then go.",
-    link: { href: `/pharmacy/${GARIDI}`, label: `Open ${garidi.pharmacy.name}` },
-  },
-  night: {
-    tag: "Tonight, 20:00 to 08:00",
-    title: `${onDuty.length === 3 ? "Three" : onDuty.length} pharmacies de garde.`,
-    body: `After closing time the map keeps only the night rota: ${onDuty.map((p) => p.commune).join(", ").replace(/, ([^,]*)$/, " and $1")}.`,
-    link: { href: "/search?garde=1", label: "Search only pharmacies de garde" },
-  },
-  pharmacist: {
-    tag: "For pharmacists",
-    title: "One tap when a box leaves.",
-    body: "The count behind your counter is the count patients see. Low stock and close expiry dates rise to the top of your list.",
-    link: { href: "/login", label: "Open the pharmacist space" },
-  },
-  action: {
-    tag: "Your turn",
-    title: "Your medicine is on a shelf in this city.",
-    body: "Search it before you leave home.",
-  },
-};
+type ChapterCopy = { tag: string; tagClass?: string; title: string; body: ReactNode; link?: { href: string; label: string } };
+
+function chapterCopy(id: Exclude<BeatId, "hook">, t: T, intl: string): ChapterCopy {
+  switch (id) {
+    case "oldway":
+      return { tag: t("ch.oldway.tag"), tagClass: "text-[#ff8a7a]", title: t("ch.oldway.title"), body: t("ch.oldway.body") };
+    case "newrule":
+      return {
+        tag: t("ch.newrule.tag"),
+        title: t("ch.newrule.title"),
+        body: t("ch.newrule.body", { out: outCount, query: QUERY, name: garidi.pharmacy.name, commune: garidi.pharmacy.commune, n: garidi.item?.qty ?? 0 }),
+      };
+    case "mechanism":
+      return {
+        tag: t("ch.mechanism.tag"),
+        title: t("ch.mechanism.title", { ago: agoText(t, garidi.item?.updatedMinsAgo ?? 0) }),
+        body: t("ch.mechanism.body"),
+        link: { href: `/pharmacy/${GARIDI}`, label: t("ch.mechanism.link", { name: garidi.pharmacy.name }) },
+      };
+    case "night":
+      return {
+        tag: t("ch.night.tag"),
+        title: t("ch.night.title", { n: onDuty.length }),
+        body: t("ch.night.body", { list: new Intl.ListFormat(intl, { type: "conjunction" }).format(onDuty.map((p) => p.commune)) }),
+        link: { href: "/search?garde=1", label: t("ch.night.link") },
+      };
+    case "pharmacist":
+      return { tag: t("ch.pharmacist.tag"), title: t("ch.pharmacist.title"), body: t("ch.pharmacist.body"), link: { href: "/login", label: t("ch.pharmacist.link") } };
+    default:
+      return { tag: t("ch.action.tag"), title: t("ch.action.title"), body: t("ch.action.body") };
+  }
+}
 
 function Chapter({ id }: { id: Exclude<BeatId, "hook"> }) {
-  const c = CHAPTERS[id];
+  const { t, intl } = useT();
+  const c = chapterCopy(id, t, intl);
   return (
     <div className={`sticky top-[56svh] lg:top-[30svh] ${gutter}`}>
       <div className={`night-card max-w-md p-6 ${id === "action" ? "lg:max-w-lg" : ""}`}>
@@ -573,7 +614,7 @@ function Chapter({ id }: { id: Exclude<BeatId, "hook"> }) {
         <p className="mt-3 leading-relaxed text-dusk-muted">{c.body}</p>
         {c.link && (
           <Link href={c.link.href} className="mt-5 inline-flex items-center gap-1.5 font-semibold text-dusk-mint hover:underline">
-            {c.link.label} <ArrowRight className="size-4" aria-hidden />
+            {c.link.label} <ArrowRight className="size-4 rtl:rotate-180" aria-hidden />
           </Link>
         )}
         {id === "action" && (

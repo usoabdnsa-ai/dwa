@@ -3,9 +3,11 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
+import { useT } from "@/lib/locale";
 
 /** Front-end only for now: any well-formed input signs in to the demo pharmacy. */
 export function LoginForm() {
+  const { t } = useT();
   const router = useRouter();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -18,18 +20,18 @@ export function LoginForm() {
         const data = new FormData(e.currentTarget);
         const email = String(data.get("email") ?? "");
         const password = String(data.get("password") ?? "");
-        if (!/^\S+@\S+\.\S+$/.test(email)) return setError("Enter the email your pharmacy registered with.");
-        if (password.length < 6) return setError("Password is at least 6 characters.");
+        if (!/^\S+@\S+\.\S+$/.test(email)) return setError(t("login.emailError"));
+        if (password.length < 6) return setError(t("login.passwordError"));
         setError(null);
         setPending(true);
         setTimeout(() => router.push("/dashboard"), 500);
       }}
-      className="surface rounded-card p-6 sm:p-8"
+      className="surface rounded-card p-6 text-ink sm:p-8"
     >
-      <h2 className="font-display text-xl font-semibold">Pharmacist sign in</h2>
+      <h2 className="font-display text-xl font-semibold">{t("login.form")}</h2>
       <div className="mt-6 space-y-4">
-        <Field label="Email" name="email" type="email" autoComplete="email" placeholder="contact@pharmacie-garidi.dz" />
-        <Field label="Password" name="password" type="password" autoComplete="current-password" />
+        <Field label={t("login.email")} dir="ltr" name="email" type="email" autoComplete="email" placeholder="contact@pharmacie-garidi.dz" />
+        <Field label={t("login.password")} name="password" type="password" autoComplete="current-password" />
       </div>
       {error && (
         <p role="alert" className="mt-4 rounded-lg bg-danger-soft px-3 py-2 text-sm text-danger">
@@ -42,9 +44,9 @@ export function LoginForm() {
         className="mt-6 flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-green font-medium text-white transition-colors duration-150 hover:bg-green-700 disabled:opacity-70"
       >
         {pending && <Loader2 className="size-4 animate-spin" aria-hidden />}
-        {pending ? "Signing in…" : "Sign in"}
+        {pending ? t("login.signing") : t("login.signIn")}
       </button>
-      <p className="mt-4 text-center text-xs text-muted">Demo: any email and a 6+ character password.</p>
+      <p className="mt-4 text-center text-xs text-muted">{t("login.demo")}</p>
     </form>
   );
 }

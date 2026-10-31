@@ -4,11 +4,13 @@ import { Search, ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useId, useMemo, useState } from "react";
 import { searchMedicines } from "@/lib/finder";
+import { useT } from "@/lib/locale";
 
 const SUGGESTED = ["Doliprane", "Augmentin", "Ventoline", "Glucophage"];
 
 /** The hero's one action: a medicine search with live suggestions. `dark` restyles the chips for the night map. */
 export function HeroSearch({ tone = "light" }: { tone?: "light" | "dark" }) {
+  const { t } = useT();
   const router = useRouter();
   const listId = useId();
   const [q, setQ] = useState("");
@@ -60,14 +62,14 @@ export function HeroSearch({ tone = "light" }: { tone?: "light" | "dark" }) {
             aria-autocomplete="list"
             autoComplete="off"
             spellCheck={false}
-            placeholder="Medicine or active ingredient…"
+            placeholder={t("hero.placeholder")}
             className="h-12 min-w-0 flex-1 bg-transparent text-lg outline-none placeholder:text-muted"
           />
           <button
             type="submit"
             className="flex h-12 items-center gap-2 rounded-xl bg-green px-5 font-medium text-white transition-colors duration-150 hover:bg-green-700"
           >
-            <span className="hidden sm:inline">Find it</span>
+            <span className="hidden sm:inline">{t("hero.find")}</span>
             <ArrowRight className="size-4" aria-hidden />
           </button>
         </div>
@@ -102,7 +104,7 @@ export function HeroSearch({ tone = "light" }: { tone?: "light" | "dark" }) {
       </form>
 
       <p className={`mt-4 flex flex-wrap items-center gap-2 text-sm ${tone === "dark" ? "text-dusk-muted" : "text-muted"}`}>
-        <span>Try</span>
+        <span>{t("hero.try")}</span>
         {SUGGESTED.map((s) => (
           <button
             key={s}

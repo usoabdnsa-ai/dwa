@@ -9,7 +9,7 @@ Map: MapLibre GL 5 + OpenFreeMap tiles, custom night style (map-style.ts), 3D bu
 Dusk tokens: dusk 061519 · dusk-2 0E262C · dusk-ink E8F3F1 · dusk-muted 8DB0B3 · dusk-mint 7AE8C8 · dusk-amber F2B35B · dusk-coral FF8A7A
 Text-safe on dusk / dusk-2: ink 16.4/13.9 · muted 7.97/6.75 · mint 12.6/10.7 · amber 10.1/8.54 · coral 8.12/6.88
 Camera rules: the desktop overview keeps all 8 pins right of the 560px text column (hook start: center 3.071,36.748 z11.3). On narrow screens, zoom is pulled back by log2(1024/w)*0.6.
-Motion: GSAP intro fly-in (top-down to pitched), then ScrollTrigger scrubs the camera with jumpTo; rAF only while scrolling. Reduced motion shows each beat's end state.
+Motion: v1 LED-cross intro restyled in dusk (map-story/night-intro.tsx, ~1.9s, once per session, skippable; it dissolves while the sign shrinks like a pin), and its end triggers the map fly-in (top-down to pitched), then ScrollTrigger scrubs the camera with jumpTo; rAF only while scrolling. Reduced motion shows each beat's end state.
 
 ## App pages (search, pharmacy, dashboard, login): v2 "clinical", unchanged below
 

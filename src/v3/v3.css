@@ -1,0 +1,164 @@
+/*
+ * tastemaker build stamp · v3 "Pill Pop"
+ * mood: playful/consumer · palette: hand-tuned to the user's pick (mint / deep green / tangerine / lilac / lemon), contrast-checked
+ * macrostructure: kinetic-hero + pinned scroll story + bento how-it-works + color-band rota + marquee close
+ * nav: N1 bar + ink pill CTA · hero: H3 split with interactive pill cluster · footer: Ft1 one-line
+ * text-safe: ink/mint 11.4 · ink/white 13.2 · mint/ink 11.4 · green/white 6.0 · green/mint 5.1 · muted/mint 5.2 · muted/white 6.1
+ *            ink/tangerine 5.6 · ink/lilac 6.3 · ink/lemon 10.1 · red/white 5.6 · amber/white 5.8 · white/green 6.0
+ * critique: show 4 · philosophy 4 · hierarchy 4 · specificity 4 · restraint 3 · variety 4
+ * Scoped under .v3 so v1/v2 are untouched.
+ */
+.v3 {
+  --pp-mint: #d6f5e6;
+  --pp-mint-2: #c2efd9;
+  --pp-white: #ffffff;
+  --pp-ink: #06372a;
+  --pp-green: #08724a;
+  --pp-muted: #3e6b5c;
+  --pp-line: #a8dcc4;
+  --pp-tang: #ff8a3d;
+  --pp-lilac: #b9a6ff;
+  --pp-lemon: #ffe066;
+  --pp-red: #c42f2a;
+  --pp-amber: #9a5300;
+
+  --pp-ease: cubic-bezier(0.23, 1, 0.32, 1);
+
+  background: var(--pp-mint);
+  color: var(--pp-ink);
+  font-family: var(--font-v3-sans), system-ui, sans-serif;
+}
+
+.v3 ::selection {
+  background: var(--pp-ink);
+  color: var(--pp-mint);
+}
+
+.v3 :focus-visible {
+  outline: 3px solid var(--pp-tang);
+  outline-offset: 3px;
+}
+
+.v3-display {
+  font-family: var(--font-v3-display), system-ui, sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 0.98;
+}
+
+.v3-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Chunky shadow: a solid offset in ink, like a sticker on the counter. */
+.v3-sticker {
+  box-shadow: 0 4px 0 0 var(--pp-ink);
+  border: 2px solid var(--pp-ink);
+}
+
+/* Pressables answer on pointer down. */
+.v3-press {
+  transition: transform 140ms var(--pp-ease);
+}
+.v3-press:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 0 var(--pp-ink);
+}
+@media (hover: hover) and (pointer: fine) {
+  .v3-press:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 0 var(--pp-ink);
+  }
+  .v3-press:active {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 0 var(--pp-ink);
+  }
+}
+
+/* Stock gauge: a capsule that fills with the quantity. */
+.v3-gauge {
+  position: relative;
+  display: block;
+  height: 14px;
+  border-radius: 999px;
+  background: var(--pp-mint);
+  border: 2px solid var(--pp-ink);
+  overflow: hidden;
+}
+.v3-gauge > i {
+  position: absolute;
+  inset: 0;
+  transform-origin: left center;
+  border-radius: 999px;
+}
+
+/* Two-row marquee of medicine pills in the closing band. */
+@keyframes v3-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+.v3-marquee {
+  animation: v3-marquee 38s linear infinite;
+}
+.v3-marquee[data-reverse] {
+  animation-direction: reverse;
+}
+.v3-marquee-wrap:hover .v3-marquee {
+  animation-play-state: paused;
+}
+
+/* De garde ring on the plan: a slow dashed spin. */
+@keyframes v3-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.v3-ring {
+  animation: v3-spin 9s linear infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@keyframes v3-ping {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+.v3-ping {
+  animation: v3-ping 1.8s var(--pp-ease) infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* Elements GSAP will animate in start hidden only when motion is allowed and JS is on. */
+@media (prefers-reduced-motion: no-preference) {
+  .v3 [data-hero-in] {
+    visibility: hidden;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v3-marquee,
+  .v3-ring,
+  .v3-ping {
+    animation: none;
+  }
+}
+
+@keyframes v3-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.97);
+  }
+}
+
+/* First-visit intro: the boot script marks repeat or reduced-motion visits before paint. */
+html[data-v3intro="skip"] .v3-intro {
+  display: none;
+}

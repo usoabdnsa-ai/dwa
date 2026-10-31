@@ -1,35 +1,98 @@
 [
- {
-  "id": "pharmacy-finder-2026-10-13",
-  "date": "2026-10-13",
-  "macrostructure": "product-demo-workbench",
-  "nav": "N6",
-  "hero": "H1",
-  "features": [
-   "F5",
-   "F4"
-  ],
-  "proof": "none (no real data yet)",
-  "cta": "C3",
-  "footer": "Ft4",
-  "section_head": "S1",
-  "mood": "warm"
- },
- {
-  "id": "pharmacy-finder-2026-10-13b",
-  "date": "2026-10-13",
-  "macrostructure": "poster-fold+sticky-stack-map-story",
-  "nav": "N3",
-  "hero": "poster-fold over live map",
-  "features": [
-   "F3"
-  ],
-  "proof": "live demo data on map",
-  "cta": "search over map",
-  "footer": "Ft2",
-  "section_head": "none (beat cards)",
-  "mood": "night/technical",
-  "palette": "hand-picked dusk + mint/amber/coral pins",
-  "outcome": "kept"
- }
+  {
+    "id": "pharmacy-finder-2026-10-13",
+    "date": "2026-10-13",
+    "macrostructure": "product-demo-workbench",
+    "nav": "N6",
+    "hero": "H1",
+    "features": [
+      "F5",
+      "F4"
+    ],
+    "proof": "none (no real data yet)",
+    "cta": "C3",
+    "footer": "Ft4",
+    "section_head": "S1",
+    "mood": "warm"
+  },
+  {
+    "id": "pharmacy-finder-2026-10-13b",
+    "date": "2026-10-13",
+    "macrostructure": "poster-fold+sticky-stack-map-story",
+    "nav": "N3",
+    "hero": "poster-fold over live map",
+    "features": [
+      "F3"
+    ],
+    "proof": "live demo data on map",
+    "cta": "search over map",
+    "footer": "Ft2",
+    "section_head": "none (beat cards)",
+    "mood": "night/technical",
+    "palette": "hand-picked dusk + mint/amber/coral pins",
+    "outcome": "kept"
+  },
+  {
+    "id": "pharmacy-finder-2026-10-13c",
+    "date": "2026-10-13",
+    "macrostructure": "kinetic-hero+pinned-scroll-story+bento-steps+color-band+marquee-close",
+    "nav": "N1",
+    "hero": "H3 split + interactive pill cluster",
+    "features": [
+      "F2"
+    ],
+    "proof": "real demo data (Ventoline 1 of 8)",
+    "cta": "search band + medicine marquee",
+    "footer": "Ft1",
+    "section_head": "S1",
+    "mood": "playful",
+    "palette": "hand-tuned user pick: mint/ink/tangerine/lilac/lemon",
+    "outcome": "pending"
+  },
+  {
+    "id": "pharmacy-finder-2026-10-13d",
+    "date": "2026-10-13",
+    "macrostructure": "centered-neon-hero+pinned-night-clock+live-feed+glow-close",
+    "nav": "N2 glass bar",
+    "hero": "H1 centered over light source",
+    "features": [
+      "live feed"
+    ],
+    "proof": "real demo data (4 of 8 open at 03:00)",
+    "cta": "search band",
+    "footer": "Ft1",
+    "section_head": "S1",
+    "mood": "premium/cinematic dark",
+    "palette": "hand-tuned user pick: neon green/magenta on near-black green",
+    "outcome": "pending"
+  },
+  {
+    "id": "pharmacy-finder-2026-10-14e",
+    "date": "2026-10-14",
+    "macrostructure": "arch-window-hero+pinned-horizontal-arcade+medallion-steps+night-band+tiled-close",
+    "nav": "N1 bar with tiled rule",
+    "hero": "H3 split, arch window illustration",
+    "features": [
+      "arcade",
+      "medallion steps"
+    ],
+    "proof": "real demo data (Ventoline 3 left at Kouba, per-pharmacy shelf counts)",
+    "cta": "search + medicine chips",
+    "footer": "Ft3 tiled band",
+    "section_head": "S1",
+    "mood": "elegant/local",
+    "palette": "hand-built zellige: ivory/blue/saffron/terracotta/green",
+    "outcome": "pending"
+  },
+  {
+    "id": "pharmacy-finder-v6b",
+    "date": "2026-10-14",
+    "project": "pharmacy-finder",
+    "surface": "v6",
+    "macrostructure": "split-hero product phone + sticky steps + dark live band + photo feature rows + stats/pro/search close",
+    "nav": "N1 sticky bar",
+    "hero": "H3 split with product phone mockup",
+    "footer": "Ft2 dark",
+    "outcome": "pending"
+  }
 ]

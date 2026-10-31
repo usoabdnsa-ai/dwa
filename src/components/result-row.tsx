@@ -2,7 +2,12 @@
 
 import Link from "next/link";
 import { Phone, ChevronRight } from "lucide-react";
-import { fmtKm, fmtUpdated, type Availability } from "@/lib/finder";
+import type { Medicine } from "@/lib/data";
+import { fmtKm, type Availability } from "@/lib/finder";
+import { agoText } from "@/lib/i18n";
+import { useT } from "@/lib/locale";
+import { ChifaBadge, RatingBadge, WaitBadge } from "./pharmacy-meta";
+import { ReserveDialog } from "./reserve-dialog";
 import { StatusBadge, OpenBadge } from "./status";
 
 export function ResultRow({
@@ -12,6 +17,7 @@ export function ResultRow({
   showStock = true,
   marks,
   onHover,
+  reserve,
 }: {
   a: Availability;
   open: boolean | null;
@@ -20,9 +26,13 @@ export function ResultRow({
   /** Annotation pins placed beside the name, the open badge and the stock line (home page capture only). */
   marks?: { name?: React.ReactNode; open?: React.ReactNode; stock?: React.ReactNode };
   onHover?: (id: string | null) => void;
+  /** The medicine being searched: shows a Reserve button on rows that have it. */
+  reserve?: Medicine;
 }) {
+  const { t } = useT();
   const { pharmacy: p, item, status } = a;
   const dim = status === "out";
+  const canReserve = !!reserve && !!item && status !== "out";
   return (
     <li
       onMouseEnter={() => onHover?.(p.id)}
@@ -44,13 +54,18 @@ export function ResultRow({
           <OpenBadge open={open} onDuty={p.onDuty} />
           {marks?.open}
         </p>
+        <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
+          <RatingBadge pharmacyId={p.id} />
+          <WaitBadge pharmacyId={p.id} open={open} />
+          <ChifaBadge pharmacyId={p.id} />
+        </p>
       </div>
 
       {showStock ? (
       <div className="flex flex-col items-end gap-1 sm:items-start">
         <StatusBadge status={status} qty={item?.qty} />
         <span className="flex items-center gap-1.5 font-mono text-[11px] text-muted">
-          {item ? `counted ${fmtUpdated(item.updatedMinsAgo)}` : "not carried"}
+          {item ? t("row.counted", { ago: agoText(t, item.updatedMinsAgo) }) : t("row.notCarried")}
           {marks?.stock}
         </span>
       </div>
@@ -59,15 +74,19 @@ export function ResultRow({
       )}
 
       <div className="relative z-10 col-span-2 flex items-center gap-2 sm:col-span-1">
+        {canReserve && <ReserveDialog pharmacy={p} medicine={reserve} available={item.qty} />}
         <a
           href={`tel:${p.phone.replace(/\s/g, "")}`}
           className="inline-flex h-9 items-center gap-2 rounded-lg px-3 text-sm font-medium ring-1 ring-line transition-colors duration-150 hover:bg-surface"
-          aria-label={`Call ${p.name}`}
+          aria-label={t("row.call", { name: p.name })}
         >
           <Phone className="size-3.5" aria-hidden />
-          <span className="font-mono text-xs nums">{p.phone.slice(5)}</span>
+          {/* With a Reserve button next to it, the call button shrinks to its icon so the name keeps its room. */}
+          <span className={`font-mono text-xs nums ${canReserve ? "sr-only" : ""}`} dir="ltr">
+            {p.phone.slice(5)}
+          </span>
         </a>
-        <ChevronRight className="hidden size-4 text-muted transition-transform duration-150 group-hover:translate-x-0.5 sm:block" aria-hidden />
+        <ChevronRight className="hidden size-4 text-muted transition-transform duration-150 group-hover:translate-x-0.5 sm:block rtl:rotate-180 rtl:group-hover:-translate-x-0.5" aria-hidden />
       </div>
     </li>
   );
