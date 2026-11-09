@@ -33,10 +33,11 @@ export async function POST(request: Request) {
 
   const { amount, description } = PRICES[purpose];
   const origin = new URL(request.url).origin;
-  // The v6 design has its own confirmation page; everything else returns to the main site.
-  const base = body.version === "v6" ? "/v6" : "";
-  const success = purpose === "deposit" ? `${origin}${base}/reservation/${ref}?paid=1` : `${origin}/pro?activated=1`;
-  const failure = purpose === "deposit" ? `${origin}${base}/reservation/${ref}?paid=0` : `${origin}/pro?cancelled=1`;
+  // v6, v7 and v8 have their own confirmation pages; everything else returns to the main site.
+  const base = ["v6", "v7", "v8"].includes(String(body.version)) ? `/${body.version}` : "";
+  const proBase = ["v7", "v8"].includes(String(body.version)) ? `/${body.version}` : "";
+  const success = purpose === "deposit" ? `${origin}${base}/reservation/${ref}?paid=1` : `${origin}${proBase}/pro?activated=1`;
+  const failure = purpose === "deposit" ? `${origin}${base}/reservation/${ref}?paid=0` : `${origin}${proBase}/pro?cancelled=1`;
 
   const secret = process.env.CHARGILY_SECRET_KEY;
   if (!secret) {

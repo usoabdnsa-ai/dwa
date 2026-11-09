@@ -6,7 +6,7 @@ import type { StyleSpecification } from "maplibre-gl";
  * Written by hand instead of recolouring a stock style so every colour comes
  * from the contracts in .tastemaker/style-lock.md.
  */
-type Palette = {
+export type Palette = {
   land: string;
   sea: string;
   park: string;
@@ -42,7 +42,7 @@ export const DAY: Palette = {
   buildings: ["#dbe6e7", "#d2dfe1", "#c8d8da"],
 };
 
-const buildStyle = (c: Palette): StyleSpecification => ({
+export const buildStyle = (c: Palette): StyleSpecification => ({
   version: 8,
   glyphs: "https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf",
   sources: {

@@ -1,0 +1,410 @@
+/*
+ * tastemaker build stamp · v8 "Liquid light" (whole dwa app: patient + pharmacist)
+ * macrostructure: centred blob poster hero + sticky card-stack problem + sticky split how-it-works
+ *   (the 3D blob morphs per step) + live bento + pharmacist strip + search close.
+ *   nav: top bar + floating bottom dock (new for this project) · footer: quiet line above the dock
+ * mood: premium / soft-tech, light, rich lilac (2026-11-04: tinted page, indigo band, coloured tiles) · palette hand-set, check_contrast.py:
+ *   ink 12131C on bg F3F4F9 and white: >16 · muted 5A5F73/bg 5.8 · faint 63687C/bg 5.0, /white 5.5
+ *   lilac 5B48D9 on white/bg >5.5 · in 0B7A55 4.9 · low 9A5200 5.3 · out C03A2B 4.9 · white on ink 18
+ * type: Funnel Display + Funnel Sans, Geist Mono for codes
+ * background: WebGL raymarched liquid-glass blob with iridescent pearl shading (blob.tsx), morphs with scroll.
+ * critique: show 4 · philosophy 4 · hierarchy 4 · specificity 4 · restraint 4 · variety 5
+ * motion: spring UI (160 to 320ms), GSAP intro (droplets merge), ScrollTrigger drives the blob morph.
+ *   Cards: white fills, no per-card backdrop blur. Reduced motion: still blob, no transitions.
+ */
+.v8 {
+  /* rich lilac: tinted page, lilac edges, deep indigo for solid surfaces */
+  --l-bg: #ebe8fb;
+  --l-card: rgb(255 255 255 / 0.7);
+  --l-card-solid: #fdfcff;
+  --l-sunk: #e3dff8;
+  --l-ink: #14122e;
+  --l-muted: #545874;
+  --l-faint: #5a5e7a;
+  --l-line: rgb(70 52 180 / 0.11);
+  --l-line-2: rgb(70 52 180 / 0.2);
+  --l-lilac: #5b48d9;
+  --l-lilac-soft: #e3defd;
+  --l-indigo: #1e1a52;
+  --l-mint: #8fe8c6;
+  --l-in: #08704e;
+  --l-in-soft: #d3f3e4;
+  --l-low: #9a5200;
+  --l-low-soft: #fdf0dc;
+  --l-out: #b03222;
+  --l-out-soft: #fde7e4;
+  --l-ease: cubic-bezier(0.23, 1, 0.32, 1);
+  --l-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+  --l-shadow: 0 1px 2px rgb(30 26 82 / 0.05), 0 14px 34px -12px rgb(70 52 180 / 0.26);
+  --l-shadow-lg: 0 2px 4px rgb(30 26 82 / 0.05), 0 30px 70px -24px rgb(70 52 180 / 0.38);
+
+  min-height: 100dvh;
+  background: var(--l-bg);
+  color: var(--l-ink);
+  font-family: var(--font-v8-sans), system-ui, sans-serif;
+  color-scheme: light;
+  -webkit-font-smoothing: antialiased;
+}
+
+@layer components {
+  /* Grid children may shrink below their content (long names, scroll rows) instead of widening the page. */
+  .v8 .grid > * {
+    min-width: 0;
+  }
+  .v8 .display {
+    font-family: var(--font-v8-display), var(--font-v8-sans), sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.035em;
+    line-height: 0.98;
+  }
+  .v8 .mono {
+    font-family: var(--font-v8-mono), ui-monospace, monospace;
+  }
+  .v8 .nums {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Frosted card: bright fill, a thin inner highlight and a lilac-tinted shadow. No backdrop blur. */
+  .v8 .card {
+    position: relative;
+    background: linear-gradient(180deg, rgb(255 255 255 / 0.84), rgb(245 242 255 / 0.68));
+    border-radius: 28px;
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.85), 0 0 0 1px var(--l-line), var(--l-shadow);
+  }
+  .v8 .card-solid {
+    background: linear-gradient(180deg, #ffffff, #f7f5ff);
+  }
+  /* coloured bento tiles */
+  .v8 .tile-lilac {
+    background: radial-gradient(120% 90% at 100% 0%, #d9d1ff 0, transparent 60%), linear-gradient(180deg, #efebff, #e6e0ff);
+  }
+  .v8 .tile-mint {
+    background: radial-gradient(120% 90% at 0% 100%, #bff0da 0, transparent 60%), linear-gradient(180deg, #ecfaf3, #ddf5ea);
+  }
+  .v8 .tile-peach {
+    background: radial-gradient(120% 90% at 100% 100%, #ffd9cc 0, transparent 60%), linear-gradient(180deg, #fff5f0, #fdebe4);
+  }
+  /* deep indigo band with a lilac and mint glow */
+  .v8 .band-indigo {
+    color: #fff;
+    background:
+      radial-gradient(60% 80% at 100% 0%, rgb(124 104 255 / 0.55), transparent 70%),
+      radial-gradient(50% 70% at 0% 100%, rgb(70 210 160 / 0.28), transparent 70%),
+      linear-gradient(160deg, #26206a, var(--l-indigo) 60%, #151236);
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.1), var(--l-shadow-lg);
+    --l-muted: rgb(255 255 255 / 0.74);
+  }
+  .v8 .frost {
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    background: rgb(250 248 255 / 0.7);
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.8), 0 0 0 1px var(--l-line), var(--l-shadow);
+  }
+
+  .v8 .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 50px;
+    padding: 0 24px;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 15px;
+    white-space: nowrap;
+    transition:
+      transform 200ms var(--l-spring),
+      background-color 160ms var(--l-ease);
+  }
+  .v8 .btn:active:not(:disabled) {
+    transform: scale(0.96);
+  }
+  .v8 .btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .v8 .btn-ink {
+    background: linear-gradient(180deg, #2b2578, var(--l-indigo));
+    color: #fff;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.14), 0 8px 20px -8px rgb(30 26 82 / 0.6);
+  }
+  .v8 .btn-soft {
+    background: rgb(255 255 255 / 0.88);
+    color: var(--l-ink);
+    box-shadow: 0 0 0 1px var(--l-line-2);
+  }
+  .v8 .btn-light {
+    background: #fff;
+    color: var(--l-indigo);
+  }
+  .v8 .btn-glass {
+    background: rgb(255 255 255 / 0.1);
+    color: #fff;
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.25);
+  }
+  .v8 .btn-sm {
+    height: 40px;
+    padding: 0 16px;
+    font-size: 14px;
+  }
+  @media (hover: hover) {
+    .v8 .btn-ink:hover:not(:disabled) {
+      background: linear-gradient(180deg, #3a32a0, #2b2578);
+    }
+    .v8 .btn-soft:hover:not(:disabled) {
+      background: #fff;
+      color: var(--l-lilac);
+    }
+    .v8 .btn-light:hover:not(:disabled) {
+      background: var(--l-lilac-soft);
+    }
+    .v8 .btn-glass:hover:not(:disabled) {
+      background: rgb(255 255 255 / 0.18);
+    }
+    .v8 .hover-rise {
+      transition: transform 280ms var(--l-spring);
+    }
+    .v8 .hover-rise:hover {
+      transform: translateY(-4px);
+    }
+  }
+
+  .v8 .input {
+    width: 100%;
+    height: 54px;
+    padding: 0 18px;
+    border-radius: 18px;
+    background: #fff;
+    color: var(--l-ink);
+    box-shadow: 0 0 0 1px var(--l-line-2);
+    font-size: 16px;
+  }
+  .v8 .input::placeholder {
+    color: var(--l-faint);
+  }
+  .v8 .input:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--l-lilac), 0 0 0 6px rgb(91 72 217 / 0.15);
+  }
+  .v8 .input[aria-invalid="true"] {
+    box-shadow: 0 0 0 2px var(--l-out);
+  }
+
+  .v8 :focus-visible {
+    outline: 2px solid var(--l-lilac);
+    outline-offset: 3px;
+  }
+  .v8 ::selection {
+    background: var(--l-lilac);
+    color: #fff;
+  }
+
+  .v8 .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 30px;
+    padding: 0 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+}
+
+@keyframes v8-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+}
+@keyframes v8-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+}
+@keyframes v8-breathe {
+  50% {
+    transform: scale(1.35);
+    opacity: 0.5;
+  }
+}
+@keyframes v8-flash {
+  from {
+    background-color: var(--l-in-soft);
+  }
+}
+.v8 .in {
+  animation: v8-in 420ms var(--l-spring) both;
+}
+.v8 .pop {
+  animation: v8-pop 260ms var(--l-spring) both;
+}
+.v8 .breathe {
+  animation: v8-breathe 2s cubic-bezier(0.45, 0, 0.55, 1) infinite; /* ambient "live" dot */
+}
+.v8 .flash {
+  animation: v8-flash 900ms ease-out; /* highlight fades after a stock change */
+}
+
+html[data-v8intro="play"] .v8-intro {
+  display: grid;
+}
+html[data-v8intro="play"]:not([data-v8intro-done]) .v8 > :is(header, main, footer, nav) {
+  opacity: 0;
+}
+.v8 > :is(header, main, footer, nav) {
+  transition: opacity 600ms var(--l-ease); /* page fades in once after the intro */
+}
+
+/* ---------- open map (map.tsx) ---------- */
+.v8 .m8-dot {
+  --c: var(--l-faint);
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--c);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 18%, transparent);
+}
+.v8 .m8-dot-sm {
+  width: 8px;
+  height: 8px;
+  box-shadow: none;
+}
+.v8 :is(.m8-dot, .m8-pin)[data-state="open"] { --c: var(--l-in); }
+.v8 :is(.m8-dot, .m8-pin)[data-state="closing"] { --c: var(--l-low); }
+.v8 :is(.m8-dot, .m8-pin)[data-state="duty"] { --c: var(--l-lilac); }
+.v8 :is(.m8-dot, .m8-pin)[data-state="closed"] { --c: #9a9db0; }
+.v8 :is(.m8-dot, .m8-pin)[data-state="unknown"] { --c: #c4c6d3; }
+
+.v8 .m8-pin {
+  --c: #c4c6d3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: opacity 300ms var(--l-ease), transform 300ms var(--l-ease);
+}
+.v8 .m8-pin[data-hidden] {
+  opacity: 0;
+  pointer-events: none;
+}
+.v8 .m8-pin button {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px 999px 999px 4px;
+  rotate: -45deg;
+  color: #fff;
+  background: var(--c);
+  box-shadow: 0 0 0 3px #fff, 0 8px 18px -6px color-mix(in srgb, var(--c) 70%, #12131c);
+  cursor: pointer;
+  transition: scale 260ms var(--l-spring), background-color 300ms var(--l-ease);
+  transform-origin: 50% 100%;
+}
+.v8 .m8-pin[data-state="closed"] button {
+  color: #9a9db0;
+  background: #fff;
+  box-shadow: 0 0 0 1.5px #c9cbd8, 0 6px 14px -8px rgb(18 19 28 / 0.4);
+}
+.v8 .m8-pin svg {
+  width: 13px;
+  height: 13px;
+  rotate: 45deg;
+}
+.v8 .m8-pin:is([data-hover], [data-on]) button {
+  scale: 1.18;
+}
+.v8 .m8-pin button:focus-visible {
+  outline: 2px solid var(--l-lilac);
+  outline-offset: 4px;
+}
+.v8 .m8-ring {
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.v8 .m8-pin[data-state="duty"] .m8-ring,
+.v8 .m8-pin[data-state="open"] .m8-ring {
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--c) 45%, transparent);
+  animation: m8-ping 2.6s var(--l-ease) infinite;
+}
+.v8 .m8-pin[data-state="open"] .m8-ring {
+  animation-duration: 3.4s;
+}
+.v8 .m8-tag {
+  margin-top: 8px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--l-ink);
+  background: rgb(255 255 255 / 0.94);
+  box-shadow: 0 0 0 1px var(--l-line), 0 6px 16px -8px rgb(40 36 90 / 0.35);
+  opacity: 0;
+  translate: 0 -4px;
+  transition: opacity 200ms var(--l-ease), translate 200ms var(--l-ease);
+  pointer-events: none;
+}
+.v8 .m8-pin:is([data-hover], [data-on]) .m8-tag {
+  opacity: 1;
+  translate: 0 0;
+}
+.v8 .m8-you {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--l-ink);
+  box-shadow: 0 0 0 4px #fff, 0 6px 14px -4px rgb(18 19 28 / 0.5);
+}
+.v8 .m8-you span {
+  position: absolute;
+  inset: -10px;
+  border-radius: 999px;
+  background: rgb(18 19 28 / 0.12);
+  animation: m8-halo 2.8s var(--l-ease) infinite;
+}
+.v8 .m8-card {
+  background: rgb(255 255 255 / 0.9);
+  animation: m8-card 420ms var(--l-spring) both;
+}
+.v8 .maplibregl-ctrl-attrib {
+  background: rgb(255 255 255 / 0.75) !important;
+  color: var(--l-faint);
+  font-size: 10.5px;
+  border-radius: 999px !important;
+}
+.v8 .maplibregl-ctrl-attrib a {
+  color: var(--l-muted);
+}
+.v8 .maplibregl-ctrl-group {
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px var(--l-line), var(--l-shadow) !important;
+}
+@keyframes m8-ping {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--c) 45%, transparent); }
+  70%, 100% { box-shadow: 0 0 0 14px color-mix(in srgb, var(--c) 0%, transparent); }
+}
+@keyframes m8-halo {
+  0% { scale: 0.6; opacity: 1; }
+  100% { scale: 1.6; opacity: 0; }
+}
+@keyframes m8-card {
+  from { opacity: 0; translate: 0 16px; scale: 0.97; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v8 *,
+  .v8 *::before,
+  .v8 *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
